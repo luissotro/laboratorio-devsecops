@@ -26,15 +26,22 @@ jobs:
         with:
           fetch-depth: 0 # Descarga todo el historial, necesario para un escaneo de secretos efectivo
 
-      # NUEVO: Escaneo de secretos en el código e historial de Git con Trufflehog (Simplificado)
+      # Escaneo de secretos en el código e historial de Git con TruffleHog (versión open source)
       - name: Escanear Secretos Expuestos (TruffleHog)
-        uses: trufflesecurity/trufflehog-enterprise-github-action@main
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --results=verified,unknown
 
       # ==========================================
       # FASE 2: CONSTRUCCIÓN Y AUTENTICACIÓN
       # ==========================================
-      # NUEVO: Nos logueamos en el registro de contenedores de GitHub (GHCR)
+      # Convertimos el nombre del repositorio a minúsculas para cumplir con el estándar de Docker
+      - name: Definir nombre de la imagen
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      # Nos logueamos en el registro de contenedores de GitHub (GHCR), solo al hacer push
       - name: Autenticar en GitHub Packages (GHCR)
+        if: github.event_name == 'push'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -44,11 +51,9 @@ jobs:
       - name: Construir imagen Docker de Nginx
         run: |
           echo "Compilando la imagen corporativa de Nginx con hardening..."
-          # Convertimos el nombre del repositorio a minúsculas para cumplir con el estándar de Docker
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          docker build -t ghcr.io/$REPO_LOWER:latest .
+          docker build -t "$IMAGE:latest" -t "$IMAGE:${{ github.sha }}" .
           # Creamos un tag local para el healthcheck
-          docker tag ghcr.io/$REPO_LOWER:latest mi-nginx-empresa:latest
+          docker tag "$IMAGE:latest" mi-nginx-empresa:latest
 
       # ==========================================
       # FASE 3: ESCANEO DE SEGURIDAD (VULNERABILIDADES)
@@ -59,7 +64,7 @@ jobs:
           scan-type: 'image'
           image-ref: 'mi-nginx-empresa:latest'
           format: 'table'
-          exit-code: '0'
+          exit-code: '0'   # informativo; cambiar a '1' para bloquear con CRITICAL/HIGH
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
@@ -82,20 +87,23 @@ jobs:
           docker rm servidor_prueba || true
 
       # ==========================================
-      # FASE 5: PUBLICACIÓN Y FIRMA DIGITAL (NUEVO)
+      # FASE 5: PUBLICACIÓN Y FIRMA DIGITAL
       # ==========================================
-      # Si el Healthcheck ha ido bien, subimos la imagen definitiva al registro
+      # Si el Healthcheck ha ido bien, subimos la imagen definitiva al registro (solo en push)
       - name: Subir imagen segura a GHCR
+        if: github.event_name == 'push'
         run: |
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          docker push ghcr.io/$REPO_LOWER:latest
+          docker push "$IMAGE:latest"
+          docker push "$IMAGE:${{ github.sha }}"
 
       # Instalamos la herramienta oficial de firma de la Linux Foundation (Cosign)
       - name: Instalar Cosign
+        if: github.event_name == 'push'
         uses: sigstore/cosign-installer@v3.7.0
 
       # Firmamos la imagen usando criptografía basada en tu identidad de GitHub (Keyless signing)
       - name: Firmar digitalmente la imagen Docker (Cosign)
+        if: github.event_name == 'push'
         run: |
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          cosign sign --yes ghcr.io/$REPO_LOWER:latest
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE:${{ github.sha }}")
+          cosign sign --yes "$DIGEST"
