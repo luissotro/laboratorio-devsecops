@@ -53,7 +53,7 @@ jobs:
           echo "Compilando la imagen corporativa de Nginx con hardening..."
           docker build -t "$IMAGE:latest" -t "$IMAGE:${{ github.sha }}" .
           # Creamos un tag local para el healthcheck
-          docker tag "$IMAGE:latest" mi-nginx-empresa:latest
+          docker tag "$IMAGE:latest" nginx-devsecops:latest
 
       # ==========================================
       # FASE 3: ESCANEO DE SEGURIDAD (VULNERABILIDADES)
@@ -62,7 +62,7 @@ jobs:
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: 'image'
-          image-ref: 'mi-nginx-empresa:latest'
+          image-ref: 'nginx-devsecops:latest'
           format: 'table'
           exit-code: '0'   # informativo; cambiar a '1' para bloquear con CRITICAL/HIGH
           vuln-type: 'os,library'
@@ -74,7 +74,7 @@ jobs:
       - name: Levantar servidor y verificar estado
         run: |
           echo "Levantando el contenedor (HTTP en 8080 y HTTPS en 8443)..."
-          docker run -d --name servidor_prueba -p 8080:8080 -p 8443:8443 mi-nginx-empresa:latest
+          docker run -d --name servidor_prueba -p 8080:8080 -p 8443:8443 nginx-devsecops:latest
           sleep 5
           echo "Comprobando el endpoint de salud (HTTP)..."
           curl -sf http://localhost:8080/healthz
