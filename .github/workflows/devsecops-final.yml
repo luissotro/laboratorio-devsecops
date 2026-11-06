@@ -28,7 +28,7 @@ jobs:
 
       # Escaneo de secretos en el código e historial de Git con TruffleHog (versión open source)
       - name: Escanear Secretos Expuestos (TruffleHog)
-        uses: trufflesecurity/trufflehog@87b0784260aa782ff7c9b0e206013a7740263f3c # v3.x.x
+        uses: trufflesecurity/trufflehog@ea68ca03c865c5f324e86e849ced20ed3cf9dbbb # v3.99.8
         with:
           extra_args: --results=verified,unknown
 
