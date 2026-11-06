@@ -28,7 +28,7 @@ jobs:
 
       # Escaneo de secretos en el código e historial de Git con TruffleHog (versión open source)
       - name: Escanear Secretos Expuestos (TruffleHog)
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@87b0784260aa782ff7c9b0e206013a7740263f3c # v3.x.x
         with:
           extra_args: --results=verified,unknown
 
@@ -59,7 +59,7 @@ jobs:
       # FASE 3: ESCANEO DE SEGURIDAD (VULNERABILIDADES)
       # ==========================================
       - name: Analizar seguridad de la imagen (Trivy)
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: 'image'
           image-ref: 'mi-nginx-empresa:latest'
