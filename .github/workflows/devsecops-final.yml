@@ -78,6 +78,8 @@ jobs:
           sleep 5
           echo "Haciendo una petición HTTP de prueba (curl)..."
           curl -sI http://localhost:8080 | grep -E "HTTP/1.1 200|HTTP/2 200"
+          curl -sI http://localhost:8080 | grep -i "x-content-type-options: nosniff"
+          curl -sI http://localhost:8080 | grep -i "content-security-policy"
           echo "¡El servidor web responde correctamente con código 200!"
 
       - name: Apagar y limpiar contenedor de pruebas
