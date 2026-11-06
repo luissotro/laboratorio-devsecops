@@ -62,7 +62,7 @@ La publicación y la firma solo se ejecutan en `push`, nunca en pull requests. L
 docker build -t laboratorio-devsecops .
 
 # Ejecutar (HTTP en 8080, HTTPS en 8443)
-docker run --rm -p 8080:8080 -p 8443:8443 nginx-hardened
+docker run --rm -p 8080:8080 -p 8443:8443 laboratorio-devsecops
 
 # Comprobar (-k porque el certificado es autofirmado)
 curl -skI https://localhost:8443
@@ -78,7 +78,7 @@ Si en `/tmp/certs` hay un `server.crt` y un `server.key`, el contenedor los usa 
 ```bash
 docker run --rm -p 8443:8443 \
   -v "$PWD/certs:/tmp/certs:ro" \
-  nginx-hardened
+  laboratorio-devsecops
 ```
 
 ## Usar la imagen publicada
