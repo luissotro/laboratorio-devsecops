@@ -1,10 +1,7 @@
 # =========================================================================
 # Etapa 1: Build y validación de archivos de configuración
 # =========================================================================
-FROM nginx:1.27.2-alpine AS builder
-
-# Instalar herramientas básicas necesarias para validar configuraciones
-RUN apk add --no-cache openssl
+FROM nginx:1.30-alpine AS builder
 
 # Copiar nuestra configuración personalizada de Nginx
 COPY nginx.conf /etc/nginx/nginx.conf
@@ -15,7 +12,7 @@ RUN nginx -t
 # =========================================================================
 # Etapa 2: Imagen final optimizada y securizada (Hardening)
 # =========================================================================
-FROM nginx:1.27.2-alpine
+FROM nginx:1.30-alpine
 
 # Buenas prácticas: Actualizar el gestor de paquetes y aplicar parches de seguridad (CVEs)
 RUN apk update && apk upgrade --no-cache
@@ -33,11 +30,15 @@ USER nginx
 # Copiar la configuración validada desde la etapa anterior
 COPY --from=builder --chown=nginx:nginx /etc/nginx/nginx.conf /etc/nginx/nginx.conf
 
-# Copiar el código estático de tu web (asegúrate de crear una carpeta 'html' con un index.html)
+# Copiar el código estático de tu web 
 COPY --chown=nginx:nginx ./html /usr/share/nginx/html
 
 # Exponer un puerto superior al 1024 (el usuario no-root 'nginx' no puede usar el puerto 80)
 EXPOSE 8080
 
+# HEALTHCHECK
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+CMD wget -q -O /dev/null http://127.0.0.1:8080/ || exit 1
+  
 # Comando de arranque por defecto
 CMD ["nginx", "-g", "daemon off;"]
