@@ -69,18 +69,28 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       # ==========================================
-      # FASE 4: VALIDACIÓN EN VIVO (HEALTHCHECK)
+      # FASE 4: VALIDACIÓN EN VIVO (HEALTHCHECK Y HTTPS)
       # ==========================================
       - name: Levantar servidor y verificar estado
         run: |
-          echo "Levantando el contenedor en el puerto 8080..."
-          docker run -d --name servidor_prueba -p 8080:8080 mi-nginx-empresa:latest
+          echo "Levantando el contenedor (HTTP en 8080 y HTTPS en 8443)..."
+          docker run -d --name servidor_prueba -p 8080:8080 -p 8443:8443 mi-nginx-empresa:latest
           sleep 5
-          echo "Haciendo una petición HTTP de prueba (curl)..."
-          curl -sI http://localhost:8080 | grep -E "HTTP/1.1 200|HTTP/2 200"
-          curl -sI http://localhost:8080 | grep -i "x-content-type-options: nosniff"
-          curl -sI http://localhost:8080 | grep -i "content-security-policy"
-          echo "¡El servidor web responde correctamente con código 200!"
+          echo "Comprobando el endpoint de salud (HTTP)..."
+          curl -sf http://localhost:8080/healthz
+          echo "Comprobando la redirección de HTTP a HTTPS..."
+          curl -sI http://localhost:8080/ | grep -E "HTTP/1.1 301"
+          echo "Haciendo una petición HTTPS de prueba (certificado autofirmado, por eso -k)..."
+          curl -skI https://localhost:8443/ | tee respuesta.txt
+          grep -E "HTTP/(1.1|2) 200" respuesta.txt
+          grep -i "strict-transport-security" respuesta.txt
+          grep -i "x-content-type-options: nosniff" respuesta.txt
+          grep -i "content-security-policy" respuesta.txt
+          echo "¡HTTPS y cabeceras de seguridad verificados!"
+
+      - name: Mostrar logs del contenedor si algo ha fallado
+        if: failure()
+        run: docker logs servidor_prueba || true
 
       - name: Apagar y limpiar contenedor de pruebas
         if: always()
