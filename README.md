@@ -59,7 +59,7 @@ La publicación y la firma solo se ejecutan en `push`, nunca en pull requests. L
 
 ```bash
 # Construir
-docker build -t nginx-hardened .
+docker build -t laboratorio-devsecops .
 
 # Ejecutar (HTTP en 8080, HTTPS en 8443)
 docker run --rm -p 8080:8080 -p 8443:8443 nginx-hardened
