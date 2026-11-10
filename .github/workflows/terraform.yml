@@ -1,0 +1,53 @@
+name: Terraform - Validación de infraestructura
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform.yml"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "terraform/**"
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Formato, validación, análisis de seguridad y plan
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v5
+
+      - name: Instalar Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+
+      - name: Comprobar formato
+        run: terraform fmt -check -recursive
+
+      - name: Inicializar (sin backend)
+        run: terraform init -backend=false -input=false
+
+      - name: Validar configuración
+        run: terraform validate
+
+      - name: Analizar configuración de Terraform (Trivy)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: 'config'
+          scan-ref: 'terraform'
+          format: 'table'
+          exit-code: '0'   # informativo
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: Plan (sin aplicar)
+        run: terraform plan -input=false -no-color
