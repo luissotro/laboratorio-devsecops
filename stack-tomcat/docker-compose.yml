@@ -1,0 +1,52 @@
+name: laboratorio-tomcat
+
+services:
+  nginx:
+    build:
+      context: ./nginx
+    image: lab-nginx:local
+    ports:
+      - "8080:8080"   # HTTP: redirige a HTTPS y expone /healthz
+      - "8443:8443"   # HTTPS
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      tomcat:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    restart: unless-stopped
+
+  tomcat:
+    build:
+      context: .
+      dockerfile: tomcat/Dockerfile
+    image: lab-tomcat:local
+    expose:
+      - "8080"        # solo accesible desde la red interna, no se publica al exterior
+    networks:
+      - backend
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /usr/local/tomcat/logs
+      - /usr/local/tomcat/temp
+      - /usr/local/tomcat/work
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    restart: unless-stopped
+
+networks:
+  frontend: {}
+  backend:
+    internal: true    # sin salida a Internet
