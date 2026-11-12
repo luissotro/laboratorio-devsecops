@@ -10,7 +10,7 @@ RUN mvn -B -q -DskipTests package
 
 # Driver JDBC de PostgreSQL: va en el classpath de Tomcat (el datasource lo define Tomcat, no la aplicación)
 RUN mvn -B -q org.apache.maven.plugins:maven-dependency-plugin:3.8.1:copy \
-      -Dartifact=org.postgresql:postgresql:42.7.7 \
+      -Dartifact=org.postgresql:postgresql:42.7.14 \
       -DoutputDirectory=/build/drivers
 
 # =========================================================================
@@ -46,7 +46,7 @@ RUN mkdir -p /usr/local/tomcat/conf/Catalina/localhost && \
     find /usr/local/tomcat/conf -maxdepth 1 -type f -exec chmod 640 {} +
 
 # Driver JDBC en el classpath de Tomcat
-COPY --from=build --chown=root:tomcat --chmod=0644 /build/drivers/postgresql-42.7.7.jar /usr/local/tomcat/lib/postgresql.jar
+COPY --from=build --chown=root:tomcat --chmod=0644 /build/drivers/postgresql-42.7.14.jar /usr/local/tomcat/lib/postgresql.jar
 
 # La aplicación, como ROOT.war (cuelga de "/")
 COPY --from=build --chown=root:tomcat --chmod=0640 /build/target/ROOT.war /usr/local/tomcat/webapps/ROOT.war

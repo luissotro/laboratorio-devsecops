@@ -58,7 +58,9 @@ services:
     restart: unless-stopped
 
   postgres:
-    image: postgres:17-alpine
+    build:
+      context: ./postgres
+    image: lab-postgres:local
     user: postgres
     networks:
       - backend       # solo red interna: no se publica ningún puerto
