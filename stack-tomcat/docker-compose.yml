@@ -33,6 +33,17 @@ services:
       - "8080"        # solo accesible desde la red interna, no se publica al exterior
     networks:
       - backend
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: appdb
+      DB_USER: app
+      # La contraseña (DB_PASSWORD) la añade entrypoint.sh a partir del secreto db_app_password
+    secrets:
+      - db_app_password
+    depends_on:
+      postgres:
+        condition: service_healthy
     read_only: true
     tmpfs:
       - /tmp
@@ -45,6 +56,47 @@ services:
       - no-new-privileges:true
     mem_limit: 512m
     restart: unless-stopped
+
+  postgres:
+    image: postgres:17-alpine
+    user: postgres
+    networks:
+      - backend       # solo red interna: no se publica ningún puerto
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_admin_password
+    secrets:
+      - db_admin_password
+      - db_app_password   # lo lee el script de inicialización para crear el usuario "app"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /run/postgresql
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d appdb"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+secrets:
+  db_admin_password:
+    file: ./secrets/db_admin_password.txt
+  db_app_password:
+    file: ./secrets/db_app_password.txt
+
+volumes:
+  pgdata: {}
 
 networks:
   frontend: {}

@@ -50,7 +50,7 @@ public class StatusServlet extends HttpServlet {
             row(out, "Conexión segura", String.valueOf(req.isSecure()));
             row(out, "IP del cliente (vista por Tomcat)", req.getRemoteAddr());
             out.println("  </table>");
-            out.println("  <p><a href=\"/health\">/health</a></p>");
+            out.println("  <p><a href=\"/health\">/health</a> &middot; <a href=\"/db\">/db</a></p>");
             out.println("</body>");
             out.println("</html>");
         }

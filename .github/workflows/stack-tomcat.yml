@@ -27,7 +27,11 @@ jobs:
       - name: Descargar repositorio
         uses: actions/checkout@v5
 
-      # Compila la aplicación con Maven (dentro de Docker) y construye las dos imágenes
+      # Genera contraseñas aleatorias para la base de datos (solo existen durante esta ejecución)
+      - name: Crear secretos
+        run: bash scripts/init-secrets.sh
+
+      # Compila la aplicación con Maven (dentro de Docker) y construye las imágenes propias
       - name: Construir imágenes
         run: docker compose build
 
@@ -45,6 +49,15 @@ jobs:
         with:
           scan-type: 'image'
           image-ref: 'lab-nginx:local'
+          format: 'table'
+          exit-code: '0'   # informativo
+          severity: 'CRITICAL,HIGH'
+
+      - name: Analizar la imagen de PostgreSQL (Trivy)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: 'image'
+          image-ref: 'postgres:17-alpine'
           format: 'table'
           exit-code: '0'   # informativo
           severity: 'CRITICAL,HIGH'

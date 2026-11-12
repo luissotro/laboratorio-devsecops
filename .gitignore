@@ -7,4 +7,6 @@ crash.log
 *.tfvars.json
 override.tf
 override.tf.json
-terraform
+
+# Secretos del stack Nginx + Tomcat + PostgreSQL (se generan en local con scripts/init-secrets.sh)
+stack-tomcat/secrets/

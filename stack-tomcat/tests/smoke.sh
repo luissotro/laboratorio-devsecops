@@ -48,5 +48,21 @@ CODE="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE_HTTPS/.env")"
 [ "$CODE" = "403" ] || fail "/.env devolvió $CODE y debería ser 403"
 echo "   OK"
 
+echo "9) La aplicación consulta PostgreSQL (datasource JNDI) a través del proxy"
+DB="$(curl -sk "$BASE_HTTPS/db")"
+echo "$DB" | grep -q '"status":"UP"' || fail "/db no devuelve UP: $DB"
+echo "$DB" | grep -q '"message":"Hola desde PostgreSQL"' || fail "/db no devuelve el dato de la base de datos"
+echo "   OK"
+
+echo "10) La aplicación usa el usuario de mínimo privilegio ('app'), no el administrador"
+echo "$DB" | grep -q '"user":"app"' || fail "/db no se conecta como el usuario 'app'"
+echo "   OK"
+
+echo "11) PostgreSQL no está expuesto en el equipo (puerto ${PG_PORT:-5432})"
+if ( exec 3<>"/dev/tcp/127.0.0.1/${PG_PORT:-5432}" ) 2>/dev/null; then
+  fail "hay algo escuchando en el puerto ${PG_PORT:-5432} (¿otro PostgreSQL local o un puerto publicado?)"
+fi
+echo "   OK"
+
 echo
 echo "Todas las pruebas han pasado."
