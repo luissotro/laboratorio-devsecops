@@ -1,0 +1,5 @@
+nginx
+tests
+docker-compose.yml
+*.md
+app/target

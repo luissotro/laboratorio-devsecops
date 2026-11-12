@@ -49,6 +49,8 @@ La publicación y la firma solo se ejecutan en `push`, nunca en pull requests. L
 ├── docker-entrypoint.d/
 │   └── 40-generate-cert.sh   # Genera el certificado autofirmado al arrancar
 ├── html/                     # Contenido estático (index.html y style.css)
+├── terraform/                # Infraestructura como código (despliegue local con Docker)
+├── stack-tomcat/             # Stack Nginx + Tomcat con aplicación Java y su propio pipeline
 ├── .dockerignore
 ├── Dockerfile
 ├── nginx.conf
@@ -59,10 +61,10 @@ La publicación y la firma solo se ejecutan en `push`, nunca en pull requests. L
 
 ```bash
 # Construir
-docker build -t laboratorio-devsecops .
+docker build -t nginx-hardened .
 
 # Ejecutar (HTTP en 8080, HTTPS en 8443)
-docker run --rm -p 8080:8080 -p 8443:8443 laboratorio-devsecops
+docker run --rm -p 8080:8080 -p 8443:8443 nginx-hardened
 
 # Comprobar (-k porque el certificado es autofirmado)
 curl -skI https://localhost:8443
@@ -78,8 +80,16 @@ Si en `/tmp/certs` hay un `server.crt` y un `server.key`, el contenedor los usa 
 ```bash
 docker run --rm -p 8443:8443 \
   -v "$PWD/certs:/tmp/certs:ro" \
-  laboratorio-devsecops
+  nginx-hardened
 ```
+
+## Infraestructura como código
+
+La carpeta [`terraform/`](terraform/) despliega la imagen publicada en local con Terraform y el proveedor de Docker (sistema de ficheros de solo lectura, sin capacidades de Linux, `no-new-privileges` y límite de memoria). Su propio workflow valida el formato, la configuración y el plan en cada cambio.
+
+## Stack Nginx + Tomcat
+
+La carpeta [`stack-tomcat/`](stack-tomcat/) contiene una segunda parte del laboratorio: una aplicación Java (un panel de estado) en Tomcat 10.1 con Nginx como proxy inverso y terminación de TLS, orquestados con Docker Compose y validados por un pipeline propio.
 
 ## Usar la imagen publicada
 
@@ -107,6 +117,9 @@ cosign verify \
 
 ## Próximos pasos
 
-- [ ] Infraestructura como código: desplegar el contenedor en una instancia EC2 de AWS con Terraform.
+- [x] Infraestructura como código en local con Terraform y Docker.
+- [x] Stack Nginx + Tomcat con aplicación Java (fase 1).
+- [ ] Añadir PostgreSQL y un datasource JNDI/JDBC al stack.
+- [ ] Llevar el despliegue a una instancia EC2 de AWS con Terraform.
 - [ ] Hacer que el pipeline falle ante vulnerabilidades críticas.
 - [ ] Monitorización básica del contenedor.
