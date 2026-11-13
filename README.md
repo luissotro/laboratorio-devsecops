@@ -1,4 +1,4 @@
-# Laboratorio DevSecOps: Nginx securizado con Docker y GitHub Actions
+# Laboratorio DevSecOps: Nginx, Tomcat y PostgreSQL con Docker, GitHub Actions y Terraform
 
 ![Pipeline](https://github.com/luissotro/laboratorio-devsecops/actions/workflows/devsecops-final.yml/badge.svg)
 
