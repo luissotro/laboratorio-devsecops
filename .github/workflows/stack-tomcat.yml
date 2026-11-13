@@ -57,7 +57,7 @@ jobs:
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: 'image'
-          image-ref: 'postgres:17-alpine'
+          image-ref: 'lab-postgres:local'
           format: 'table'
           exit-code: '0'   # informativo
           severity: 'CRITICAL,HIGH'
