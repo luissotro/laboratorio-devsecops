@@ -89,7 +89,7 @@ La carpeta [`terraform/`](terraform/) despliega la imagen publicada en local con
 
 ## Stack Nginx + Tomcat
 
-La carpeta [`stack-tomcat/`](stack-tomcat/) contiene una segunda parte del laboratorio: una aplicación Java (un panel de estado) en Tomcat 10.1 con Nginx como proxy inverso y terminación de TLS, orquestados con Docker Compose y validados por un pipeline propio.
+La carpeta [`stack-tomcat/`](stack-tomcat/) contiene una segunda parte del laboratorio: una aplicación Java (un panel de estado) en Tomcat 10.1 con Nginx como proxy inverso, terminación de TLS y PostgreSQL, orquestados con Docker Compose y validados por un pipeline propio.
 
 ## Usar la imagen publicada
 
@@ -119,7 +119,7 @@ cosign verify \
 
 - [x] Infraestructura como código en local con Terraform y Docker.
 - [x] Stack Nginx + Tomcat con aplicación Java (fase 1).
-- [ ] Añadir PostgreSQL y un datasource JNDI/JDBC al stack.
+- [x] PostgreSQL y datasource JNDI/JDBC en el stack, con secretos de Docker (fase 2).
 - [ ] Llevar el despliegue a una instancia EC2 de AWS con Terraform.
 - [ ] Hacer que el pipeline falle ante vulnerabilidades críticas.
 - [ ] Monitorización básica del contenedor.

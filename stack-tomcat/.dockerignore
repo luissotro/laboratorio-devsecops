@@ -1,5 +1,8 @@
 nginx
 tests
+postgres
+scripts
+secrets
 docker-compose.yml
 *.md
 app/target
