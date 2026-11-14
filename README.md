@@ -2,7 +2,7 @@
 
 ![Pipeline](https://github.com/luissotro/laboratorio-devsecops/actions/workflows/devsecops-final.yml/badge.svg)
 
-Proyecto personal para practicar un flujo DevSecOps completo sobre una imagen Docker de Nginx con HTTPS: construcción con hardening, análisis de seguridad en cada cambio, prueba de arranque y de TLS, publicación en GitHub Container Registry (GHCR) y firma digital de la imagen.
+Proyecto personal para practicar un flujo DevSecOps completo: una imagen Docker de Nginx con HTTPS y un stack Nginx + Tomcat + PostgreSQL con una aplicación Java. Incluye construcción con hardening, análisis de seguridad en cada cambio (secretos, dependencias e imágenes), pruebas automáticas, publicación en GitHub Container Registry, firma digital de la imagen e infraestructura como código con Terraform.
 
 > **Alcance:** es un laboratorio de aprendizaje. El certificado TLS es autofirmado y se genera al arrancar el contenedor; en un entorno real se montaría un certificado emitido por una CA (ver más abajo).
 
