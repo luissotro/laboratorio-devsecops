@@ -6,6 +6,8 @@ Proyecto personal para practicar un flujo DevSecOps completo: una imagen Docker 
 
 > **Alcance:** es un laboratorio de aprendizaje. El certificado TLS es autofirmado y se genera al arrancar el contenedor; en un entorno real se montaría un certificado emitido por una CA (ver más abajo).
 
+<img width="1887" height="436" alt="image" src="https://github.com/user-attachments/assets/6d7feebe-b093-486f-b482-4037b4a9d442" />
+
 ## Qué hace el pipeline
 
 Se ejecuta en cada `push` a `main`/`master` y en cada pull request (workflow en `.github/workflows/`).
