@@ -3,6 +3,10 @@ name: Pipeline DevSecOps Unificado - Nginx & Seguridad Avanzada
 on:
   push:
     branches: [ "main", "master" ]
+    paths-ignore:
+      - "**.md"
+      - "stack-tomcat/**"
+      - "terraform/**"
   pull_request:
     branches: [ "main" ]
 
